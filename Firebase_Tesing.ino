@@ -8,8 +8,8 @@
 #define WIFI_PASSWORD "8765432112"
 
 // Firebase Credentials
-#define DATABASE_URL "https://esp32testing-b35d1-default-rtdb.firebaseio.com/"
-#define API_KEY "AIzaSyBEPOAA8vdEUx7bihiw49MLaJoIwmO1in4"
+#define DATABASE_URL ""
+#define API_KEY ""
 
 FirebaseData fbdo;
 FirebaseConfig config;
