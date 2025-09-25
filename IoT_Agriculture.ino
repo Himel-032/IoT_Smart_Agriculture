@@ -8,13 +8,15 @@
 #define DHT_PIN 4
 #define DHT_TYPE DHT22
 #define FLOAT_PIN 27
+#define LDR_D_PIN 23
+#define LED_PIN 15
 
 DHT dht(DHT_PIN, DHT_TYPE);
 
 // ------------------- Calibration -------------------
 const int dryValue = 3500;   // raw ADC when soil is dry
 const int wetValue = 1130;   // raw ADC when soil is wet
-const int numSamples = 11;   // median filter
+const int numSamples = 4;   // median filter
 const float alpha = 0.1;     // smoothing factor
 
 float smoothed1 = 0;
@@ -32,6 +34,10 @@ void setup() {
 
   dht.begin();
 
+  pinMode(LDR_D_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+
   Serial.println("Smart Dual Soil + DHT22 system initializing...");
 }
 
@@ -40,6 +46,16 @@ void loop() {
   int soilAvg = getSoilAvg();
   float temp = getTemperature();
   float hum = getHumidity();
+  int state = digitalRead(LDR_D_PIN);
+
+  if (state == LOW) {
+    // Depending on module, HIGH might mean bright
+    Serial.println("🌞 Daytime detected");                                            =                                                                                                             
+    digitalWrite(LED_PIN, LOW);   // LED OFF at day
+  } else {
+    Serial.println("🌙 Nighttime detected");
+    digitalWrite(LED_PIN, HIGH);  // LED ON at night
+  }
 
   // Print readings
   Serial.print("Water: "); Serial.print(isWaterPresent());
@@ -55,7 +71,7 @@ void loop() {
   // ---- Smart watering decision using soil, temp, and humidity ----
   bool needWater = false;
 
-  if (soilAvg < 40) {  // soil dry
+  if (soilAvg < 50) {  // soil dry
     if (!isnan(hum) && !isnan(temp)) {
       if (hum < 85 && temp > 10) {    // air not too humid, temp reasonable
         needWater = true;
